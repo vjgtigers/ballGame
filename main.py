@@ -4,41 +4,73 @@ import pygame
 import math
 import random
 import playsound
-
+import time
 import threading
 nosie = playsound.playsound("./noise2.mp3")
 def playNoise():
     playsound.playsound("./noise2.mp3")
+
+
+time.sleep(1)
 pygame.init()
 
 # Set up the drawing window
-screen = pygame.display.set_mode([500, 500])
+screen = pygame.display.set_mode([1000, 1000])
 
 # Run until the user asks to quit
 running = True
 
 Ppos = []
-
-ballSize = 12.5
-boxLen = 400
-boxHig = 300
-initHig = 30
+va22 = 40
+ballSize = 25
+boxLen = 9*va22
+boxHig = 9*va22
+initHig = 100
 initWid = 50
 
 x = (boxLen+initWid)/2
 y = (initHig+boxHig)/2
-speed = 2
+speed = 3.5
 xVel = 1
 yVel = 1
-angle = math.pi/4
+angle = math.pi/3.5
 drawLoop = 0
-drawLoopInc = 3
+drawLoopInc = 5
 col = 0
 col2 = 0
-angleRand = True
+random.seed(5)
+angleRand = False
 colMul = 1
-ranvalangle= random.random()*3/25
+ranvalangle= random.random()*3/30
+
+white = (255, 255, 255)
+black = (0, 0, 0)
+
+# assigning values to X and Y variable
+X = 400
+Y = 400
+
+
+
+font = pygame.font.Font('freesansbold.ttf', 64)
+
+# create a text surface object,
+# on which text is drawn on it.
+word = '0'
+text = font.render(word, True, white, black)
+
+# create a rectangular object for the
+# text surface object
+textRect = text.get_rect()
+
+# set the center of the rectangular object.
+textRect.center = ((boxLen+initWid)/2, 50)
+
+
 def gameLoop():
+    global text
+    global word
+    global textRect
     global ranvalangle
     global angle
     global Ppos
@@ -60,16 +92,19 @@ def gameLoop():
     global drawLoopInc
     global drawLoop
     if drawLoop == drawLoopInc:
+        if len(Ppos) == 400:
+            Ppos.pop(0)
+
         Ppos.append((x,y, ballSize, col, col2))
         drawLoop = 0
         print("sdfasf")
-        if col == 255:
+        if col >= 255:
             colMul = -1
-            col =  col + 1*colMul
+            col =  col + 2*colMul
             col2+=10
-        elif col == 0:
+        elif col <= 0:
             colMul = 1
-            col = col + 1*colMul
+            col = col + 2*colMul
             col2 +=10
         else:
             col = col+ 1*colMul
@@ -85,11 +120,11 @@ def gameLoop():
     Ximpact = False
     Yimpact = False
     if xVel ==1:
-        if rx >= boxLen:
+        if rx >= boxLen+5:
             xVel = -1
             x = x-speed*math.cos(angle)
             Ximpact = True
-        elif rx <= boxLen:
+        elif rx <= boxLen+5:
             x = x + speed*math.cos(angle)
     elif xVel == -1:
         if lx<=initWid:
@@ -118,17 +153,22 @@ def gameLoop():
 
 
     if Ximpact == True or Yimpact == True:
-        x2 = threading.Thread(target=playNoise)
-        x2.start()
-        ballSize *= 1.00
-        speed *= 1.02
+        word = str(int(word) +1)
+        text = font.render(word, True, white, black)
+        textRect = text.get_rect()
+        textRect.center = ((boxLen+initWid)/2, 50)
+        #x2 = threading.Thread(target=playNoise)
+        #x2.start()
+        playsound.playsound("./noise2.mp3", False)
+        ballSize *= 1.0
+        speed *= 1.01
         if angleRand == True:
             yon = random.randint(0,1)
             if yon ==0:
                 angle -=ranvalangle
             else: angle +=ranvalangle
 init = 0
-gameRate = 2
+gameRate = 5
 
 while running:
 
@@ -151,9 +191,11 @@ while running:
         #print(i)
     #    print(Ppos)
     #    exit()
-        pygame.draw.circle(screen, (0, i[4], i[3]), (i[0], i[1]), i[2])
+        val = abs((i[3]%510)-255)
+        #pygame.draw.circle(screen, (abs(i[3]/(i[4]+1)), i[3], i[3]), (i[0], i[1]), i[2])
+        pygame.draw.circle(screen, (val, val, val), (i[0], i[1]), i[2])
 
-
+    screen.blit(text, textRect)
     # Draw a solid blue circle in the center
     pygame.draw.circle(screen, (0, 0, 255), (x, y), ballSize)
     pygame.draw.rect(screen, (44,44,255),pygame.Rect(boxLen, initHig, 5, boxHig))
